@@ -7,16 +7,21 @@ using System.Linq;
 
 namespace CSharpAdvanceDesignTests
 {
-    public class CombineKeyComparer
+    public class CombineKeyComparer : IComparer<Employee>
     {
-        public CombineKeyComparer(Func<Employee, string> firstKeySelector, IComparer<string> firstKeyComparer)
+        public Func<Employee, string> KeySelector { get; private set; }
+        public IComparer<string> KeyComparer { get; private set; }
+
+        public CombineKeyComparer(Func<Employee, string> keySelector, IComparer<string> keyComparer)
         {
-            FirstKeySelector = firstKeySelector;
-            FirstKeyComparer = firstKeyComparer;
+            KeySelector = keySelector;
+            KeyComparer = keyComparer;
         }
 
-        public Func<Employee, string> FirstKeySelector { get; private set; }
-        public IComparer<string> FirstKeyComparer { get; private set; }
+        public int Compare(Employee x, Employee y)
+        {
+            return KeyComparer.Compare(KeySelector(x), KeySelector(y));
+        }
     }
 
     [TestFixture]
@@ -35,7 +40,9 @@ namespace CSharpAdvanceDesignTests
             };
 
 
-            var actual = JoeyOrderByLastNameAndFirstName(employees, new CombineKeyComparer(employee => employee.LastName, Comparer<string>.Default), employee => employee.FirstName, Comparer<string>.Default);
+            Func<Employee, string> secondKeySelector = employee => employee.FirstName;
+            IComparer<string> secondKeyComparer = Comparer<string>.Default;
+            var actual = JoeyOrderByLastNameAndFirstName(employees, new CombineKeyComparer(employee => employee.LastName, Comparer<string>.Default), new CombineKeyComparer(secondKeySelector, secondKeyComparer));
 
             var expected = new[]
             {
@@ -49,10 +56,12 @@ namespace CSharpAdvanceDesignTests
         }
 
         private IEnumerable<Employee> JoeyOrderByLastNameAndFirstName(
-            IEnumerable<Employee> employees, CombineKeyComparer combineKeyComparer,
-            Func<Employee, string> secondKeySelector,
-            IComparer<string> secondKeyComparer)
+            IEnumerable<Employee> employees,
+            IComparer<Employee> combineKeyComparer,
+            IComparer<Employee> secondCombinedKeyComparer)
         {
+           
+
             //bubble sort
             var elements = employees.ToList();
             while (elements.Any())
@@ -62,14 +71,14 @@ namespace CSharpAdvanceDesignTests
                 for (int i = 1; i < elements.Count; i++)
                 {
                     var employee = elements[i];
-                    if (combineKeyComparer.FirstKeyComparer.Compare(combineKeyComparer.FirstKeySelector(employee), combineKeyComparer.FirstKeySelector(minElement)) < 0)
+                    if (combineKeyComparer.Compare(employee, minElement) < 0)
                     {
                         minElement = employee;
                         index = i;
                     }
-                    else if (combineKeyComparer.FirstKeyComparer.Compare(combineKeyComparer.FirstKeySelector(employee), combineKeyComparer.FirstKeySelector(minElement)) == 0)
+                    else if (combineKeyComparer.Compare(employee, minElement) == 0)
                     {
-                        if (secondKeyComparer.Compare(secondKeySelector(employee), secondKeySelector(minElement)) < 0)
+                        if (secondCombinedKeyComparer.Compare(employee, minElement) < 0)
                         {
                             minElement = employee;
                             index = i;
