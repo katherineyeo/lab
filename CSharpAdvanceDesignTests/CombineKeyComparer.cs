@@ -4,16 +4,16 @@ using Lab.Entities;
 
 namespace CSharpAdvanceDesignTests
 {
-    public class CombineKeyComparer : IComparer<Employee>
+    public class CombineKeyComparer<TKey> : IComparer<Employee>
     {
-        public Func<Employee, string> KeySelector { get; private set; }
-        public IComparer<string> KeyComparer { get; private set; }
-
-        public CombineKeyComparer(Func<Employee, string> keySelector, IComparer<string> keyComparer)
+        public CombineKeyComparer(Func<Employee, TKey> keySelector, IComparer<TKey> keyComparer)
         {
             KeySelector = keySelector;
             KeyComparer = keyComparer;
         }
+
+        public Func<Employee, TKey> KeySelector { get; private set; }
+        public IComparer<TKey> KeyComparer { get; private set; }
 
         public int Compare(Employee x, Employee y)
         {

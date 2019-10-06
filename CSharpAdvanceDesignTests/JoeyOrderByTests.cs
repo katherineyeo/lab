@@ -20,8 +20,8 @@ namespace CSharpAdvanceDesignTests
                 new Employee {FirstName = "Joey", LastName = "Chen"},
             };
 
-            var firstComparer = new CombineKeyComparer(employee => employee.LastName, Comparer<string>.Default);
-            var secondComparer = new CombineKeyComparer(employee => employee.FirstName, Comparer<string>.Default);
+            var firstComparer = new CombineKeyComparer<string>(employee => employee.LastName, Comparer<string>.Default);
+            var secondComparer = new CombineKeyComparer<string>(employee => employee.FirstName, Comparer<string>.Default);
 
             var actual = JoeyOrderByLastNameAndFirstName(
                 employees,
