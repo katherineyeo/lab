@@ -19,12 +19,13 @@ namespace CSharpAdvanceDesignTests
                 new Employee {FirstName = "Joseph", LastName = "Chen"},
                 new Employee {FirstName = "Joey", LastName = "Chen"},
             };
-            
-            var actual = JoeyOrderByLastNameAndFirstName(employees,
-                new ComboComparer(
-                    new CombineKeyComparer(employee => employee.LastName, Comparer<string>.Default),
-                    new CombineKeyComparer(employee => employee.FirstName, Comparer<string>.Default))
-                );
+
+            var firstComparer = new CombineKeyComparer(employee => employee.LastName, Comparer<string>.Default);
+            var secondComparer = new CombineKeyComparer(employee => employee.FirstName, Comparer<string>.Default);
+
+            var actual = JoeyOrderByLastNameAndFirstName(
+                employees,
+                new ComboComparer(firstComparer, secondComparer));
 
             var expected = new[]
             {
@@ -47,10 +48,11 @@ namespace CSharpAdvanceDesignTests
             {
                 var minElement = elements[0];
                 var index = 0;
+                var finalCompareResult = 0;
                 for (int i = 1; i < elements.Count; i++)
                 {
                     var employee = elements[i];
-                    var finalCompareResult = comboComparer.Compare(employee, minElement);
+                    finalCompareResult = comboComparer.Compare(employee, minElement);
 
                     if (finalCompareResult < 0)
                     {
